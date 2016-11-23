@@ -23,5 +23,9 @@ def get_redis(field=None):
     return get('redis', field)
 
 
+def get_mongo(field=None):
+    return get('mongo', field)
+
+
 def get_monitor(field=None):
     return get('monitor', field)

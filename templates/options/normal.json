@@ -1,0 +1,38 @@
+{"title": {
+      "text": "{{ title  }}",
+ },
+ "legend": {
+      "data": [
+        {% for l in legend %}
+            "{{ l }}",
+        {% end %}
+              ]
+ },
+ "xAxis": {
+      "name": "时间",
+      "type": "time",
+ },
+ "yAxis": {
+      "name": "百分比",
+      "type": "value"
+ },
+  "dataZoom": [
+        {   // 这个dataZoom组件，默认控制x轴。
+            "type": "slider", // 这个 dataZoom 组件是 slider 型 dataZoom 组件
+            "start": 90,      // 左边在 10% 的位置。
+            "end": 100         // 右边在 60% 的位置。
+        }
+    ],
+ "series": [
+            {% for k, v in series.items() %}
+                {"name": "{{ k }}",
+                 "type": "line",
+                 "data": [
+                   {% for d, i in v %}
+                   ["{{ d }}", {{ i }}],
+                   {% end %}
+                         ],
+                },
+            {% end %}
+           ]
+ }
