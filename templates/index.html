@@ -27,10 +27,23 @@
     {% end %}
 
   </div>
+<script type="text/javascript">
+  var interval = Number({{ interval }});
+  var ts = interval;
+  async_get(true);
+  setInterval("async_get(false)", interval);
 
-
-
-<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+  function async_get (ishide) {
+    {% for plugin in plugins %}
+        $.get('/plugin/{{ plugin["title"] }}?ts=' + String(ts - interval), function (data) {
+          if (ishide == true) {
+            {{ plugin["title"] }}_Chart.hideLoading();
+          }
+          {{ plugin["title"] }}_Chart.setOption(data);
+        });
+    {% end %}
+    ts = (new Date()).valueOf() / 1000;
+  }
+</script>
 </body>
 </html>

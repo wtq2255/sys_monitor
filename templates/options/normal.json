@@ -1,38 +1,63 @@
 {"title": {
-      "text": "{{ title  }}",
+      "text": "{{ title  }}"
  },
  "legend": {
       "data": [
-        {% for l in legend %}
-            "{{ l }}",
+        {% for i, k in enumerate(legend) %}
+          {% if i == len(legend) - 1 %}
+            "{{ k }}"
+          {% else %}
+            "{{ k }}",
+          {% end %}
         {% end %}
-              ]
+      ]
  },
  "xAxis": {
       "name": "时间",
-      "type": "time",
+      "type": "time"
  },
  "yAxis": {
       "name": "百分比",
       "type": "value"
  },
   "dataZoom": [
-        {   // 这个dataZoom组件，默认控制x轴。
-            "type": "slider", // 这个 dataZoom 组件是 slider 型 dataZoom 组件
-            "start": 90,      // 左边在 10% 的位置。
-            "end": 100         // 右边在 60% 的位置。
+        {
+            "type": "slider",
+            "start": 90,
+            "end": 100
         }
     ],
  "series": [
-            {% for k, v in series.items() %}
+            {% for i, (k, v) in enumerate(series.items()) %}
+              {% if i == len(series) -1 %}
                 {"name": "{{ k }}",
                  "type": "line",
                  "data": [
-                   {% for d, i in v %}
-                   ["{{ d }}", {{ i }}],
+                   {% for j, (d, p) in enumerate(v) %}
+                      {% if j == len(v) - 1 %}
+                        ["{{ d }}", {{ p }}]
+
+                      {% else %}
+                        ["{{ d }}", {{ p }}],
+                      {% end %}
                    {% end %}
-                         ],
+                         ]
+                }
+              {% else %}
+                {"name": "{{ k }}",
+                 "type": "line",
+                 "data": [
+                   {% for j, (d, p) in enumerate(v) %}
+                      {% if j == len(v) - 1 %}
+                        ["{{ d }}", {{ p }}]
+
+                      {% else %}
+                        ["{{ d }}", {{ p }}],
+                      {% end %}
+                   {% end %}
+                         ]
                 },
+              {% end %}
             {% end %}
            ]
  }

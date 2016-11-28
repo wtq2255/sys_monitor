@@ -1,5 +1,5 @@
 import os
-import json
+import threading
 from collections import defaultdict
 
 import tornado.web
@@ -8,13 +8,14 @@ import tornado.httpserver
 from tornado.options import options, define, parse_command_line
 
 from config import get_web, get_monitor
-from monitor import CPUMonitor
+from monitor import CPUMonitor, RAMMonitor
+from monitor import main as monitor_main
 
 define('debug', default=True, help='enable debug mode')
 
 _categorys = {
     'cpu': CPUMonitor(),
-    'ram': CPUMonitor()
+    'ram': RAMMonitor()
 }
 
 
@@ -31,8 +32,9 @@ def format_series(datas):
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         categorys = get_monitor('category').strip().split(',')
+        interval = int(get_monitor('interval')) * 1000
         plugins = [{'title': c} for c in categorys]
-        self.render('index.html', plugins=plugins)
+        self.render('index.html', plugins=plugins, interval=interval)
 
 
 class PluginModule(tornado.web.UIModule):
@@ -46,12 +48,10 @@ class PluginsHandler(tornado.web.RequestHandler):
         ts = self.get_argument('ts', None)
         datas = _categorys[plugin.lower()].get(ts)
         series = format_series(datas)
-        legend = list(series.keys())
+        legend = series.keys()
         self.set_header("Content-Type", "application/json; charset=UTF-8")
-        js = self.render_string('options/normal.json', title=plugin, legend=legend, series=series)
-        print(type(js))
-        print(json.loads(js))
-        self.write(json.dumps({'a': 1}))
+        self.render('options/normal.json', title=plugin, legend=legend, series=series)
+        # self.write(json.dumps({'a': 1}))
         # self.write(js)
 
 
@@ -64,7 +64,6 @@ class Application(tornado.web.Application):
         ]
 
         settings = dict(
-            blog_title='sys monitor',
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             # xsrf_cookies=True,
@@ -77,12 +76,17 @@ class Application(tornado.web.Application):
 
 
 def main():
+    monitor_run()
     tornado.options.parse_command_line()
     http_server = tornado.httpserver.HTTPServer(Application())
     # 监听端口
     http_server.listen(get_web('port'), get_web('host'))
     # 启动服务
     tornado.ioloop.IOLoop.instance().start()
+
+def monitor_run():
+    t = threading.Thread(target=monitor_main)
+    t.start()
 
 if __name__ == "__main__":
     main()

@@ -2,28 +2,10 @@
   <div class="col-md-12">
     <div id="main_{{ plugin['title'] }}" style="width: 100%;height:400px;"></div>
     <script type="text/javascript">
-      $(document).ready(function() {
-        // 基于准备好的dom，初始化echarts实例
-        var {{ plugin["title"] }}_Chart = echarts.init(document.getElementById('main_{{ plugin["title"] }}'));
-        // 使用刚指定的配置项和数据显示图表。
-        {{ plugin["title"] }}_Chart.showLoading();
-        $.get('/plugin/{{ plugin["title"] }}', function (data) {
-          {{ plugin["title"] }}_Chart.hideLoading();
-          console.log(data);
-          {{ plugin["title"] }}_Chart.setOption(data);
-        });
-        {#      $(function() {#}
-        {#        $.ajax({#}
-        {#          url: '/plugin/{{ plugin["title"] }}',#}
-        {#          dataType: 'json',#}
-        {#          success: function(data) {#}
-        {#            {{ plugin["title"] }}_Chart.hideLoading();#}
-        {#            console.log(data);#}
-        {#            {{ plugin["title"] }}_Chart.setOption(data);#}
-        {#        },#}
-        {#        });#}
-        {#      });#}
-      });
+      // 基于准备好的dom，初始化echarts实例
+      var {{ plugin["title"] }}_Chart = echarts.init(document.getElementById('main_{{ plugin["title"] }}'));
+      // 使用刚指定的配置项和数据显示图表。
+      {{ plugin["title"] }}_Chart.showLoading();
     </script>
   </div>
 </div>
