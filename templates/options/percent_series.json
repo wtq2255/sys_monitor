@@ -1,0 +1,34 @@
+{ "series": [
+            {% for i, (k, v) in enumerate(series.items()) %}
+              {% if i == len(series) -1 %}
+                {"name": "{{ k }}",
+                 "type": "line",
+                 "data": [
+                   {% for j, (d, p) in enumerate(v) %}
+                      {% if j == len(v) - 1 %}
+                        ["{{ d }}", {{ p }}]
+
+                      {% else %}
+                        ["{{ d }}", {{ p }}],
+                      {% end %}
+                   {% end %}
+                         ]
+                }
+              {% else %}
+                {"name": "{{ k }}",
+                 "type": "line",
+                 "data": [
+                   {% for j, (d, p) in enumerate(v) %}
+                      {% if j == len(v) - 1 %}
+                        ["{{ d }}", {{ p }}]
+
+                      {% else %}
+                        ["{{ d }}", {{ p }}],
+                      {% end %}
+                   {% end %}
+                         ]
+                },
+              {% end %}
+            {% end %}
+           ]
+ }

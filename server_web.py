@@ -45,14 +45,16 @@ class PluginModule(tornado.web.UIModule):
 class PluginsHandler(tornado.web.RequestHandler):
 
     def get(self, plugin):
-        ts = self.get_argument('ts', None)
-        datas = _categorys[plugin.lower()].get(ts)
+        utc_ts = self.get_argument('utc_ts', None)
+        print(utc_ts)
+        datas = _categorys[plugin.lower()].get(utc_ts)
         series = format_series(datas)
         legend = series.keys()
         self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.render('options/normal.json', title=plugin, legend=legend, series=series)
-        # self.write(json.dumps({'a': 1}))
-        # self.write(js)
+        if utc_ts == '0':
+            self.render('options/percent.json', title=plugin, legend=legend, series=series)
+        else:
+            self.render('options/percent_series.json', series=series)
 
 
 class Application(tornado.web.Application):
