@@ -53,29 +53,18 @@ class BaseModel(object):
         return queryset
 
 
-class CPUModel(BaseModel):
-    _fields = ['id', 'user', 'nice', 'system', 'iowait', 'irq', 'softirq',
-               'steal', 'guest', 'guest_nice', 'created_at']
+    def save(self, **key):
+        key['created_at'] = datetime.datetime.utcnow()
+        self.col.insert(key)
 
+
+class CPUModel(BaseModel):
     def __init__(self, mcfg):
         col = 'cpu'
         super(CPUModel, self).__init__(mcfg, col)
 
-    def save(self, **key):
-        post = dict([(f, float(key.get(f, 0))) for f in self._fields])
-        post.pop('id')
-        post['created_at'] = datetime.datetime.utcnow()
-        self.col.insert(post)
-
 
 class RAMModel(BaseModel):
-    _fields = ['id', 'available', 'used', 'free', 'active', 'inactive', 'buffers', 'cached', 'shared']
     def __init__(self, mcfg):
         col = 'ram'
         super(RAMModel, self).__init__(mcfg, col)
-
-    def save(self, **key):
-        post = dict([(f, int(key.get(f, 0))) for f in self._fields])
-        post.pop('id')
-        post['created_at'] = datetime.datetime.utcnow()
-        self.col.insert(post)

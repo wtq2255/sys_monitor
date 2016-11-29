@@ -32,7 +32,7 @@ def format_series(datas):
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         categorys = get_monitor('category').strip().split(',')
-        interval = int(get_monitor('interval')) * 1000
+        interval = int(get_monitor('interval'))
         plugins = [{'title': c} for c in categorys]
         self.render('index.html', plugins=plugins, interval=interval)
 
@@ -45,13 +45,12 @@ class PluginModule(tornado.web.UIModule):
 class PluginsHandler(tornado.web.RequestHandler):
 
     def get(self, plugin):
-        utc_ts = self.get_argument('utc_ts', None)
-        print(utc_ts)
+        utc_ts = float(self.get_argument('utc_ts', None))
         datas = _categorys[plugin.lower()].get(utc_ts)
         series = format_series(datas)
         legend = series.keys()
         self.set_header("Content-Type", "application/json; charset=UTF-8")
-        if utc_ts == '0':
+        if utc_ts < int(get_monitor('interval')):
             self.render('options/percent.json', title=plugin, legend=legend, series=series)
         else:
             self.render('options/percent_series.json', series=series)

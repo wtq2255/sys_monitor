@@ -31,18 +31,18 @@
   var interval = Number({{ interval }});
   var utc_ts = interval;
   async_get(true);
-  setInterval("async_get(false)", interval);
+  setInterval("async_get(false)", interval * 1000);
 
   function async_get (ishide) {
     {% for plugin in plugins %}
-        $.get('/plugin/{{ plugin["title"] }}?utc_ts=' + String(utc_ts - interval), function (data) {
+        $.get('/plugin/{{ plugin["title"] }}?utc_ts=' + String(utc_ts - interval + 2), function (data) {
           if (ishide == true) {
             {{ plugin["title"] }}_Chart.hideLoading();
           }
           {{ plugin["title"] }}_Chart.setOption(data);
         });
     {% end %}
-    var d = new Date()
+    var d = new Date();
     utc_ts = d.getTime() / 1000 + d.getTimezoneOffset() * 60;
   }
 </script>
