@@ -30,17 +30,44 @@
 <script type="text/javascript">
   var interval = Number({{ interval }});
   var utc_ts = interval;
+  var point_count = Number({{ expire }}) / interval - 1;
+  {% for plugin in plugins %}
+    var {{ plugin["title"] }}_data = null;
+  {% end %}
   async_get(true);
   setInterval("async_get(false)", interval * 1000);
 
   function async_get (ishide) {
     {% for plugin in plugins %}
-        $.get('/plugin/{{ plugin["title"] }}?utc_ts=' + String(utc_ts - interval + 2), function (data) {
-          if (ishide == true) {
-            {{ plugin["title"] }}_Chart.hideLoading();
+      $.ajax({
+          type : "get",
+          url : '/plugin/{{ plugin["title"] }}?utc_ts=' + String(utc_ts - interval + 2),
+          async : false,
+          success : function(data){
+            if (ishide == true) {
+              {{ plugin["title"] }}_Chart.hideLoading();
+            }
+            if (utc_ts == interval) {
+              {{ plugin["title"] }}_data = data;
+            } else {
+              for (var name in data) {
+                for (var s in {{ plugin["title"] }}_data['series']) {
+                  if ({{ plugin["title"] }}_data['series'][s]["name"] == name) {
+                    Array.prototype.push.apply({{ plugin["title"] }}_data['series'][s]["data"], data[name]);
+                    break;
+                  }
+                }
+              }
+            }
+            if ({{ plugin["title"] }}_data['series'][0]['data'].length >= point_count) {
+              for (var s in {{ plugin["title"] }}_data['series']) {
+                  {{ plugin["title"] }}_data['series'][s]["data"].shift();
+                }
+            }
+            console.log({{ plugin["title"] }}_data['series']);
+            {{ plugin["title"] }}_Chart.setOption({{ plugin["title"] }}_data);
           }
-          {{ plugin["title"] }}_Chart.setOption(data);
-        });
+      });
     {% end %}
     var d = new Date();
     utc_ts = d.getTime() / 1000 + d.getTimezoneOffset() * 60;

@@ -21,6 +21,10 @@ class BaseMonitor(object):
             return self.model.get(utc_ts=utc_ts)
 
 
+    def get_one(self, utc_ts):
+        return self.model.get_one(utc_ts)
+
+
     def div(self, num1, num2):
         if num2 == 0:
             return 0.0

@@ -1,4 +1,5 @@
 import os
+import json
 import threading
 from collections import defaultdict
 
@@ -33,8 +34,9 @@ class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         categorys = get_monitor('category').strip().split(',')
         interval = int(get_monitor('interval'))
+        expire = int(get_monitor('expire'))
         plugins = [{'title': c} for c in categorys]
-        self.render('index.html', plugins=plugins, interval=interval)
+        self.render('index.html', plugins=plugins, interval=interval, expire=expire)
 
 
 class PluginModule(tornado.web.UIModule):
@@ -46,14 +48,17 @@ class PluginsHandler(tornado.web.RequestHandler):
 
     def get(self, plugin):
         utc_ts = float(self.get_argument('utc_ts', None))
-        datas = _categorys[plugin.lower()].get(utc_ts)
-        series = format_series(datas)
-        legend = series.keys()
         self.set_header("Content-Type", "application/json; charset=UTF-8")
         if utc_ts < int(get_monitor('interval')):
+            datas = _categorys[plugin.lower()].get()
+            series = format_series(datas)
+            legend = series.keys()
             self.render('options/percent.json', title=plugin, legend=legend, series=series)
         else:
-            self.render('options/percent_series.json', series=series)
+            data = _categorys[plugin.lower()].get_one(utc_ts)
+            data = format_series([data])
+            data = json.dumps(data)
+            self.write(data)
 
 
 class Application(tornado.web.Application):

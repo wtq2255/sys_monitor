@@ -1,6 +1,7 @@
 import datetime
 from collections import namedtuple, OrderedDict
 
+import pymongo
 from pymongo import MongoClient
 from pymongo.errors import OperationFailure
 
@@ -44,6 +45,7 @@ class BaseModel(object):
         queryset = self.col.find().sort([('created_at', 1)])
         return None if queryset is None else (MongoResult(self.tz, **q) for q in queryset)
 
+
     def get(self, utc_ts):
         if not isinstance(utc_ts, datetime.datetime):
             utc_ts = float(utc_ts)
@@ -52,6 +54,21 @@ class BaseModel(object):
         queryset = (MongoResult(self.tz, **q) for q in queryset)
         return queryset
 
+
+    def get_one(self, utc_ts):
+        if not isinstance(utc_ts, datetime.datetime):
+            utc_ts = float(utc_ts)
+            utc_ts = datetime.datetime.fromtimestamp(utc_ts)
+        result = list(self.col.find().sort([('created_at', pymongo.DESCENDING)]).limit(1))
+        if result:
+            result = result[0]
+            if utc_ts > result["created_at"]:
+                result = None
+            else:
+                result = MongoResult(self.tz, **result)
+        else:
+            result = None
+        return result
 
     def save(self, **key):
         key['created_at'] = datetime.datetime.utcnow()
