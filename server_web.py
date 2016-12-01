@@ -21,6 +21,8 @@ _categorys = {
 
 
 def format_series(datas):
+    if datas is None:
+        return {}
     series = defaultdict(lambda: list())
     for data in datas:
         data.pop('_id')
